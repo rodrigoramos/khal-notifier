@@ -1,0 +1,31 @@
+#!/bin/bash
+
+enableService() {
+  isEnabled=$(systemctl --user is-enabled $1 2>/dev/null)
+  if [[ $? -ne 0 || "$isEnabled" = "disabled" ]]; then
+    echo Enabling Service $1
+    systemctl --user enable $1
+  fi
+}
+
+echo Installing Khal Notifier
+
+echo Append script to Users bin
+ln -f ../src/scripts/khal-notifier.sh ~/.local/bin
+
+echo Append systemd service and timer
+if [ ! -d ~/.config/systemd ]; then mkdir ~./config/systemd; fi
+if [ ! -d ~/.config/systemd/user ]; then mkdir ~./config/systemd/user; fi
+
+cp ../src/systemd-services/* ~/.config/systemd/user
+
+echo Import services on systemd
+systemctl --user daemon-reload
+
+enableService khal-notifier.service
+enableService khal-notifier-timer.timer
+
+systemctl --user start khal-notifier-timer.timer
+
+echo Done!
+

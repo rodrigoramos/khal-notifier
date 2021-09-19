@@ -1,0 +1,12 @@
+
+[Unit]
+Description=Execs the Khal Notifier
+Requires=khal-notifier.service
+
+[Timer]
+Unit=khal-notifier.service
+OnCalendar=*:*:0/15
+OnBootSec=0min
+
+[Install]
+WantedBy=timers.target

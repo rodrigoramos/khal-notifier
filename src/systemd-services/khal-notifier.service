@@ -1,0 +1,10 @@
+[Unit]
+Description=Check every minute if there is an event on Khal and notifies the user
+Wants=khal-notifier-timer.timer
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/khal-notifier.sh
+
+[Install]
+WantedBy=multi-user.target
