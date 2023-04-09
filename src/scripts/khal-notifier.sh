@@ -1,13 +1,23 @@
 #!/bin/bash
 
 # Obter eventos
-event=$(khal list --format "{start-time}|{title}\n{location}" today today | grep -oP '(?<='$(date +%H:%M)'\|).+$' --color=never)
+event=$(khal list --format "{start-time}::{title}::{description}|" today today)
 
-if [ "$event" = "" ]; then
-  echo No events at $(date +%H:%M)
-  exit 0
-fi
+# Split the string based on the delimiter, ':'
+readarray -d '|' -t strarr <<< "$event"
+printf "\n"
 
-# Notify Event
-notify-send "Reunião Agora" "$event" -i /usr/share/icons/Papirus-Dark/16x16/apps/calendar.svg
+# Print each value of the array by using loop
+for (( n=0; n < ${#strarr[*]}; n++))
+do
+
+  event_name=$(echo "${strarr[n]}" | grep -oP '$(date +%H:%M)')
+
+  if [[ "$event_name" != "" ]]; then
+    event_name=$(echo "${strarr[n]}" | grep -oP '(?<=\d\d:\d\d::)[^::]+')
+    url=$(echo "${strarr[n]}" | grep -oP 'http[s]*://[^>]+')
+
+    notify-send "Reunião Agora" "$event_name" -i /usr/share/icons/Papirus-Dark/16x16/apps/calendar.svg
+  fi
+done
 
